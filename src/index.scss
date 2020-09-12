@@ -72,7 +72,7 @@ input[type="file"] {
 }
 
 .Application {
-  max-width: 600px;
+  max-width: 700px;
   margin: auto;
 }
 
@@ -146,12 +146,15 @@ input[type="file"] {
 }
 
 .Post {
-  border: 1px solid $input-color;
+  border: 2px ridge $input-color;
   margin-bottom: 1em;
+  padding: 10px;
+  margin-top: 1em;
 }
 
 .Post--content {
   padding: 1em;
+ 
   h3 {
     margin-top: 0;
   }

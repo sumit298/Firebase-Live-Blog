@@ -1,68 +1,66 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Firebase and React
 
-## Available Scripts
+## Initial Set Up
 
-In the project directory, you can run:
+- Set up a new project on Firebase Console.
+- Take a tour of firebase Console.
+- Go the setup of your platform and copy config file in your codebase.
+- Now Go to Database section in firebase console of your app and create a new Cloud Firestore.
+- Follow necessary steps for ex. deciding for test mode(Development) or locked mode(Production).
+- Put into test mode after selecting necessary location of the database server.
 
-### `npm start`
+## Installing firebase in your React Application
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Let's make a new file called 'firebase.js'.
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+```js
+import firebase from 'firebase/app';
 
-### `npm test`
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+    apiKey: 'AIzaSyBW-2gHAbTDei5kpnx2U_aG-LJTxrgwrt0',
+    authDomain: 'fir-live-blog-d6f43.firebaseapp.com',
+    databaseURL: 'https://fir-live-blog-d6f43.firebaseio.com',
+    projectId: 'fir-live-blog-d6f43',
+    storageBucket: 'fir-live-blog-d6f43.appspot.com',
+    messagingSenderId: '823090351833',
+    appId: '1:823090351833:web:e0ee06bcfd03f95a8678c8',
+    measurementId: 'G-D890YWLKGL',
+};
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+firebase.initializeApp(firebaseConfig);
 
-### `npm run build`
+export default firebase;
+```
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Some Important Points:
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+- The apiKey just associates you with a Firebase project. We don't need to hide it.
+  - Your project will be protected by security rules later.
+  - There is a second, more important key that we'll use later that *should* be hidden.
+- We're just pulling in `firebase/app` so that we don't end up pulling in more than we need in our client-side application.
+- We configure Firebase and then we'll export it for use in other places in our application.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Setting up cloud firestore
 
-### `npm run eject`
+```js
+import firebase from 'firebase/app';
+import 'firebase/firestore'; //New
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+    apiKey: 'AIzaSyBW-2gHAbTDei5kpnx2U_aG-LJTxrgwrt0',
+    authDomain: 'fir-live-blog-d6f43.firebaseapp.com',
+    databaseURL: 'https://fir-live-blog-d6f43.firebaseio.com',
+    projectId: 'fir-live-blog-d6f43',
+    storageBucket: 'fir-live-blog-d6f43.appspot.com',
+    messagingSenderId: '823090351833',
+    appId: '1:823090351833:web:e0ee06bcfd03f95a8678c8',
+    measurementId: 'G-D890YWLKGL',
+};
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+firebase.initializeApp(firebaseConfig);
+export const firestore = firebase.firestore(); //NEW
+export default firebase;
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+```

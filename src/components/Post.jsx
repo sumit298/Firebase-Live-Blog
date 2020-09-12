@@ -6,8 +6,8 @@ const Post = ({ title, content, user, createdAt, stars, comments }) => {
 	return (
 		<article className="Post">
 			<div className="Post-content">
-				<h3>{title}</h3>
-				<div>{content}</div>
+				<h2>{title}</h2>
+				<div style={{fontSize: '1.2rem', margin: '15px 0'}}>{content}</div>
 			</div>
 			<div className="Post--meta">
 				<div>
