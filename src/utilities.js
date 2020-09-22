@@ -1,0 +1,1 @@
+export const collectIdAndData = doc => ({id: doc.id, ...doc.data()});

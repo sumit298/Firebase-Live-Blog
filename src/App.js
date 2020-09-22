@@ -2,11 +2,11 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import Posts from './components/Posts';
 import { firestore } from './firebase';
+import { collectIdAndData } from './utilities';
 
 function App() {
 	const [state, setState] = useState({
-		posts: [
-],
+		posts: [],
 	});
 	// snapshot = current state of the database in the firebase firestore.
 
@@ -14,7 +14,7 @@ function App() {
 		const getData = async () => {
 			const snapShot = await firestore.collection('posts').get();
 
-			const posts = snapShot.docs.map(doc=> ({id: doc.id, ...doc.data()}));
+			const posts = snapShot.docs.map(collectIdAndData);
 			setState({posts})
 
 				

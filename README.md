@@ -155,3 +155,24 @@ An aside, combining the document IDs with the data is something we're going to b
 export const collectIdsAndData = doc => ({ id: doc.id, ...doc.data() })
 ```
 
+Now, we will refactor our code as follows in `App.js`:
+
+```js
+useEffect(()=>{
+  const getData = async ()=>{
+    const snapShot = await firestore.collection('posts').get();
+    const posts = snapShot.docs.map(collectIdsAndData);
+
+    setState({posts});
+  }
+  getData();
+},[])
+```
+
+Now, we can get rid of predefined posts in state.
+
+```js
+const [state, setState] = useState({
+ posts: [],
+});
+```
