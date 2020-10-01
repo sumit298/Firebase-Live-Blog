@@ -7,7 +7,8 @@ const AddPost = ({ onCreate }) => {
 
     const { title, content } = post;
     const defaultPost = {
-      id: Date.now().toString(),
+      // not any need of id because of firebase id autogenerates.
+      // id: Date.now().toString(),
       title,
       content,
       user: {
@@ -18,7 +19,7 @@ const AddPost = ({ onCreate }) => {
       },
       favorites: 0,
       comments: 0,
-      createdAt: new Date(),
+      createdAt: new Date().toUTCString(),
     };
 
     onCreate(defaultPost);

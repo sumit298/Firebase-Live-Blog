@@ -22,15 +22,28 @@ function App() {
 		getData();
 	}, []);
 
-	const handleCreate = (post) => {
+	const handleCreate =  async(post) => {
 		const { posts } = state;
-		setState({ posts: [...posts, post] });
+		const docRef = await firestore.collection('posts').add(post);
+		const doc = await docRef.get();
+		const newPost = collectIdAndData(doc)
+		setState({ posts: [...posts, newPost] });
 	};
+
+	const handleRemove = async (id)=>{
+		const allPosts = state.posts;
+
+		await firestore.doc(`posts/${id}`).delete()
+		const posts = allPosts.filter(post=> post.id !== id);
+		setState({posts});
+		console.log(posts);
+	}
+
 	const { posts } = state;
 	return (
 		<main className="Application">
 			<h1>My Blogs</h1>
-			<Posts posts={posts} onCreate={handleCreate} />
+			<Posts posts={posts} onCreate={handleCreate} onRemove={handleRemove} />
 		</main>
 	);
 }

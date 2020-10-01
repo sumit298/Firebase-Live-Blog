@@ -176,3 +176,10 @@ const [state, setState] = useState({
  posts: [],
 });
 ```
+
+### Adding a new Post
+
+First of all, we need to get rid of that `Date.now()` based `id` in `AddPost`. It was useful for us for a second or two there, but now have Firebase generating for us on our behalf.
+
+```js
+  const handleCreate = async
