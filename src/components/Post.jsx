@@ -1,17 +1,25 @@
 import React from 'react';
 
 import moment from 'moment';
+import { firestore } from '../firebase';
 
-const Post = ({ id ,title, content, user, createdAt, stars, comments, onRemove }) => {
+const Post = ({ id, title, content, user, createdAt, stars, comments }) => {
+	const postRef = firestore.doc(`posts/${id}`);
+	const remove = () => postRef.delete();
+	const addStar = () =>
+		postRef.update({
+			stars: stars + 1,
+		});
+
 	return (
 		<article className="Post">
 			<div className="Post-content">
 				<h2>{title}</h2>
-				<div style={{fontSize: '1.2rem', margin: '15px 0'}}>{content}</div>
+				<div style={{ fontSize: '1.2rem', margin: '15px 0' }}>{content}</div>
 			</div>
 			<div className="Post--meta">
 				<div>
-					<p>
+					<p >
 						<span role="img" aria-label="star">
 							⭐️
 						</span>
@@ -27,8 +35,10 @@ const Post = ({ id ,title, content, user, createdAt, stars, comments, onRemove }
 					<p>{moment(createdAt).calendar()}</p>
 				</div>
 				<div>
-					<button className="star">Star</button>
-					<button className="delete" onClick={()=>onRemove(id)}>Delete</button>
+					<button onClick={addStar} className="star">Star</button>
+					<button className="delete" onClick={remove}>
+						Delete
+					</button>
 				</div>
 			</div>
 		</article>
@@ -36,16 +46,13 @@ const Post = ({ id ,title, content, user, createdAt, stars, comments, onRemove }
 };
 
 Post.defaultProps = {
-	title: 'An Incredibly Hot Take',
-	content:
-		'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Ducimus est aut dolorem, dolor voluptatem assumenda possimus officia blanditiis iusto porro eaque non ab autem nihil! Alias repudiandae itaque quo provident.',
 	user: {
 		id: '123',
-		displayName: 'Sumit Sinha',
+		displayName: 'Sunny',
 		email: 'billmurray@mailinator.com',
 		photoURL: 'https://www.fillmurray.com/300/300',
 	},
-	createdAt: new Date(),
+	// createdAt: new Date(),
 	stars: 0,
 	comments: 0,
 };

@@ -1,6 +1,7 @@
+import { firestore } from '../firebase';
 import React, { useState } from 'react';
 
-const AddPost = ({ onCreate }) => {
+const AddPost = () => {
 	const [post, setPost] = useState({ title: '', content: '' });
 	const handleSubmit = (event) => {
 		event.preventDefault();
@@ -13,7 +14,7 @@ const AddPost = ({ onCreate }) => {
 			content,
 			user: {
 				uid: '1111',
-				displayName: 'Sumit Sinha',
+				displayName: 'Rahul Mehra',
 				email: 'sumit@gmail.com',
 				photoURL: 'http://placekitten.com/g/200/200',
 			},
@@ -22,7 +23,7 @@ const AddPost = ({ onCreate }) => {
 			createdAt: new Date().toUTCString(),
 		};
 
-		onCreate(defaultPost);
+		firestore.collection('posts').doc().set(defaultPost)
 		setPost({ content: '', title: '' });
 	};
 	const handleChange = (event) => {

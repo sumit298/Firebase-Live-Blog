@@ -89,7 +89,7 @@ useEffect(async()=>{
 
 Hmm.. that looks like a `QuerySnapShot` not our posts. What is that?
 Actually Firebase Firestore returns us snapShot of the data. i.e current state
-of the data in the database, there are two types of snapshots `QuerySnapShot` and `DocumentSnapShot`. 
+of the data in the database, there are two types of snapshots `QuerySnapShot` and `DocumentSnapShot`.
 
 ### QuerySnapShots
 
@@ -147,7 +147,7 @@ useEffect(()=>{
 
 ```
 
-For sake of simplicity and reusability, 
+For sake of simplicity and reusability,
 
 An aside, combining the document IDs with the data is something we're going to be doing a lot. Let's make a utility method in `utilities.js`:
 
@@ -199,7 +199,7 @@ First of all, we need to get rid of that `Date.now()` based `id` in `AddPost`. I
 
 In `App.js`
 
-I will fix later but for now I am passing this function via props. 
+I will fix later but for now I am passing this function via props.
 from App.js => Posts.js => Post.js  i.e Prop drilling.
 
 ```js
@@ -239,4 +239,67 @@ useEffect(()=>{
     }
 })
 
+```
 
+Currently I am manually passing data to the state, and firebase
+does this automatically i will remove some code which are passed through props from `App.js` to their respective components.
+
+### Refactoring
+
+In `Post.jsx`
+
+```js
+  // Grabbing id of the document and deleting them.
+  const postRef = firestore.doc(`posts/${id}`);
+  const remove = ()=>postRef.delete()
+  // Passing this remove function to the delete button
+```
+
+In `AddPost.jsx`
+
+```js
+  // Idk why doc() is working? will figure it out later.
+  firestore.collection('posts').doc().set(defaultPost);
+```
+
+In `Application.jsx`:
+
+- Removed the `handleCreate` method completely.
+- Removed the `handleRemove` method completely.
+- Removed `onCreate` and `onRemove` from the `<Post />` component in the `render()` method.
+
+### Getting the order right
+
+```js
+ useEffect(()=>{
+   let unsubscribe = null;
+   const getData = async ()=>{
+     unsubscribe = firestore.collection('posts').orderBy('createdAt','desc').onSnapshot(snapshot=>{
+       const posts = await snapshot.docs.map(collectIdAndData);
+       setState({posts})
+     })
+   }
+   getData();
+   return ()=>{
+     unsubscribe();
+   }
+ },[])
+
+```
+
+### Updating Documents
+
+Let's implement a approach to updating documents in cloud firestore.
+For updating, we can use `set()` method which will create new record, if data not exists otherwise wipe the existing data.
+
+Another method is `update()` which will update the some fields of the document without overwriting the existing data.
+
+In Blog Post, we have star button, so when a user clicks on the star button, we should eventually increase the stars in the post.
+
+Now currently is not the best way to do this, but I will update it later.
+
+```js
+const postRef = firestore.doc(`posts/${id}`);
+const addStar = ()=> postRef.update({ stars: stars + 1});
+// Now passing this function to the star button by using onClick event.
+```
