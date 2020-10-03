@@ -262,7 +262,7 @@ In `AddPost.jsx`
   firestore.collection('posts').doc().set(defaultPost);
 ```
 
-In `Application.jsx`:
+In `App.jsx`:
 
 - Removed the `handleCreate` method completely.
 - Removed the `handleRemove` method completely.
