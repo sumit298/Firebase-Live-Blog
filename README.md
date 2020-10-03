@@ -182,4 +182,61 @@ const [state, setState] = useState({
 First of all, we need to get rid of that `Date.now()` based `id` in `AddPost`. It was useful for us for a second or two there, but now have Firebase generating for us on our behalf.
 
 ```js
-  const handleCreate = async
+
+  // Function for Add Post.
+  const handleCreate = async (post){
+    const {posts} = state;
+    const docRef = await firestore.collection('posts').add(post);
+    const doc = await docRef.get();
+    const newPost = collectIdAndData(doc)
+    setState({posts: [...posts, newPost]})
+  }
+```
+
+-> Get rid of automatically generate date-based ID!
+
+### Removing a Post
+
+In `App.js`
+
+I will fix later but for now I am passing this function via props. 
+from App.js => Posts.js => Post.js  i.e Prop drilling.
+
+```js
+
+const handleRemove = async (id)=>{
+  const allPosts = state.posts;
+  await firestore.doc(`/posts/${id}`).delete();
+  const posts = allPosts.filter(post=> post.id !== id);
+  setState({posts});
+}
+```
+
+### Subscribing to Changes
+
+Instead of managing data manually, you can also subscribe to the changes in the database. Instead of a `get()` method on the collection we can go with `onSnapshot()`.
+
+For realtime updates in the app use onSnapshot. Here we are
+continuously firing query so that data in the database change UI change.
+but we will stop listening to the database when component
+unmounted or navigate away from that section to prevent memory leaks,by using unsubscribe method.
+
+refactoring useEffect in the `App.js`
+
+```js
+useEffect(()=>{
+  let unsubscribe = null;
+  const getData = async ()=>{
+    unsubscribe = firestore.collection('posts').onSnapshot(snapshot=>{
+      const posts =  snapshot.docs.map(collectIdAndData);
+      setState({posts});
+
+    })
+    getData();
+    // For unsubscribing from the database cleanup function
+    return ()=>{
+      unsubscribe();
+    }
+})
+
+
