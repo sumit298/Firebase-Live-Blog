@@ -11,34 +11,35 @@ function App() {
 	});
 	const [user, setUser] = useState({
 		user: null,
+		userLoaded: false
 	});
 
 	// snapshot = current state of the database in the firebase firestore.
 	useEffect(() => {
-		let unsubscribeFromFirebase = null;
+		let unsubscribeFromFirestore = null;
 		let unsubscribeFromAuth = null;
 
 		const getData = async () => {
-			unsubscribeFromFirebase = await firestore
+			unsubscribeFromFirestore = await firestore
 				.collection('posts')
 				.orderBy('createdAt', 'desc')
 				.onSnapshot((snapshot) => {
 					const posts = snapshot.docs.map(collectIdAndData);
 					setState({ posts });
-					console.log(posts);
+				
 				});
 		};
 		const getAuth = async () => {
 			unsubscribeFromAuth = await auth.onAuthStateChanged((user) => {
 				console.log(user);
-				setUser({ user });
+				setUser({ user, userLoaded: true });
 			});
 		};
 
 		getData();
 		getAuth();
 		return () => {
-			unsubscribeFromFirebase();
+			unsubscribeFromFirestore();
 			unsubscribeFromAuth();
 		};
 	}, []);

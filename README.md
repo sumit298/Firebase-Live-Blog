@@ -303,3 +303,108 @@ const postRef = firestore.doc(`posts/${id}`);
 const addStar = ()=> postRef.update({ stars: stars + 1});
 // Now passing this function to the star button by using onClick event.
 ```
+
+## Authentication
+
+Right now, the application is wide open. If we pushed this to production, any user could do literally anything they wanted with our database. That's not good.
+
+Let's implement authentication in our application.
+
+First, let's head over to the dashboard and turn on some authentication. We'll be using 4 forms of authentication.
+
+- Email and password authentication
+- Google sign-in
+- Github sign-in
+- Facebook sign-in
+  
+Let's enable this on firebase console.
+
+Google authentication will not require to register our app explicitly.
+but for github and facebook sign-in we will have to register our app in their consoles and from there we will get `App-Id` and `App-secret`, which you can store in the sign-in-method tab of the authentication in firebase console.
+
+### Writing the current user up to the application state
+
+```js
+  const [user, setUser] = useState({
+    user: null
+  })
+```
+
+Cool.We have a `CurrentUser`, `SignIn`, and `SignUp` components ready to rock.
+
+We're going to start with Google Sign-in because I can assume you have a Google account if you can create a Firebase application.
+
+In `firebase.js`:
+
+```js
+import 'firebase/auth';
+
+// ...
+export const auth = firebase.auth();
+export const provider = new firebase.auth.GoogleAuthProvider();
+// there is signInWithRedirect method also which will redirect to the google sign in page.
+export const googleSignIn = () => auth.signInWithPopup(provider);
+```
+
+In `SignIn.jsx`
+
+```js
+<button onClick={googleSignIn}>Sign In With Google</button>
+```
+
+same goes with facebook and github sign in.
+
+- create new the provider with respective sign in.
+- i.e export const provider = new firebase.auth.FacebookAuthProvider()
+
+- create the method to pass the provider in the signInWithPopup or signInWithRedirect function.
+- i.e export const facebookSignIn = () => auth.signInWithPopup(provider)
+
+### Updating Based on Authentication State
+
+In `App.js`
+
+```js
+useEffect(()=>{
+  let unsubscribeFromFirestore = null;
+  let unsubscribeFromAuth = null;
+
+  const getData = async ()=>{
+    unsubscribeFromFirestore = await firestore.collection('posts').orderBy('createdAt', 'desc').onSnapshot(snapshot=>{
+      const posts = snapshot.docs.map(collectIdAndData);
+      setState({posts});
+    });
+  };
+
+  const getAuth = async ()=>{
+    // OnAuthStateChanged method is for when user login, we will get user information and when user logout then user will set back to null.
+    unsubscribeFromAuth = await auth.onAuthStateChanged(user=>{
+      setState({user});
+    })
+  }
+
+  getData();
+  getAuth();
+
+  return ()=>{
+    unsubscribeFromFirestore();
+    unsubscribeFromAuth();
+  }
+
+},[])
+
+```
+
+### SignOut
+
+In `firebase.js`
+
+```js
+export const signOut = ()=>auth.signOut();
+```
+
+Now In `CurrentUser.jsx`
+
+```js
+<button onClick={signOut}>Sign Out</button>
+```
