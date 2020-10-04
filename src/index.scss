@@ -124,6 +124,12 @@ input[type="file"] {
     font-weight: bold;
     margin: 0.5em 0.5em;
   }
+  .last-sign-in:before {
+    content: 'Last Signed In';
+    color: $comment-highlight-color;
+    font-weight: bold;
+    margin: 0.5em 0.5em;
+  }
 }
 
 .AddPost,

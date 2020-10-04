@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { facebookSignIn, githubSignIn, googleSignIn } from "../firebase";
 
 function SignIn() {
   const [signInState, setSignInState] = useState({
@@ -32,11 +33,13 @@ function SignIn() {
         type="password"
         name="email"
         value={password}
-        placeholder="Email"
+        placeholder="Password"
         onChange={handleChange}
       />
       <input type="submit" value="Sign In" />
-      <button>Sign In with Google</button>
+      <button onClick={googleSignIn}>Sign In with Google</button>
+      <button onClick={githubSignIn}>Sign In with Github</button>
+      <button onClick={facebookSignIn}>Sign In with Facebook</button>
     </form>
   );
 }

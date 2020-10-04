@@ -1,7 +1,15 @@
 import React from 'react';
 import moment from 'moment';
+import { signOut } from '../firebase';
 // Children???
-function CurrentUser({ displayName, email, photoURL, createdAt, children }) {
+function CurrentUser({
+	metadata,
+	displayName,
+	email,
+	photoURL,
+	createdAt,
+	children,
+}) {
 	return (
 		<section className="CurrentUser">
 			<div className="CurrentUser--profile">
@@ -10,10 +18,11 @@ function CurrentUser({ displayName, email, photoURL, createdAt, children }) {
 					<h2>{displayName}</h2>
 					<p className="email">{email}</p>
 					<p className="created-at">{moment(createdAt).calendar()}</p>
+					<p className="last-sign-in">{metadata.lastSignInTime}</p>
 				</div>
 			</div>
 			<div>{children}</div>
-			<button>Sign Out</button>
+			<button onClick={signOut}>Sign Out</button>
 		</section>
 	);
 }

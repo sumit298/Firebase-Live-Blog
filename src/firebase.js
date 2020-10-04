@@ -1,5 +1,6 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+import 'firebase/auth';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -15,6 +16,14 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
+export const auth = firebase.auth();
+export const googleProvider = new firebase.auth.GoogleAuthProvider();
+export const githubProvider = new firebase.auth.GithubAuthProvider();
+export const facebookProvider = new firebase.auth.FacebookAuthProvider();
+export const googleSignIn = () => auth.signInWithPopup(googleProvider);
+export const facebookSignIn = () => auth.signInWithPopup(facebookProvider);
+export const githubSignIn = () => auth.signInWithPopup(githubProvider);
+export const signOut = () => auth.signOut();
 export const firestore = firebase.firestore();
 
 window.firebase = firebase;
