@@ -1,4 +1,4 @@
-import { firestore } from '../firebase';
+import { firestore, auth } from '../firebase';
 import React, { useState } from 'react';
 
 const AddPost = () => {
@@ -7,23 +7,24 @@ const AddPost = () => {
 		event.preventDefault();
 
 		const { title, content } = post;
+		const { uid, displayName, email, photoURL } = auth.currentUser || {};
 		const defaultPost = {
 			// not any need of id because of firebase id autoGenerates.
 			// id: Date.now().toString(),
 			title,
 			content,
 			user: {
-				uid: '1111',
-				displayName: 'Rahul Mehra',
-				email: 'sumit@gmail.com',
-				photoURL: 'http://placekitten.com/g/200/200',
+				uid,
+				displayName,
+				email,
+				photoURL,
 			},
 			favorites: 0,
 			comments: 0,
 			createdAt: new Date().toUTCString(),
 		};
 
-		firestore.collection('posts').doc().set(defaultPost)
+		firestore.collection('posts').doc().set(defaultPost);
 		setPost({ content: '', title: '' });
 	};
 	const handleChange = (event) => {
@@ -53,3 +54,14 @@ const AddPost = () => {
 };
 
 export default AddPost;
+
+
+// service cloud.firestore {
+// 	match /databases/{database}/documents {
+// 	  match /posts/{postId} {
+// 		allow read;
+// 		allow create: if request.auth.uid != null;
+// 		allow update, delete: if request.auth.uid == resource.data.user.uid;
+// 	  }
+// 	}
+//   }

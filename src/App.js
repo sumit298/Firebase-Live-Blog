@@ -46,6 +46,7 @@ function App() {
 
 	return (
 		<main className="Application">
+			
 			<Authentication user={user.user} />
 			<Posts posts={state.posts} />
 		</main>

@@ -35,9 +35,9 @@ export default firebase;
 
 Some Important Points:
 
-- The apiKey just associates you with a Firebase project. We don't need to hide it.
-  - Your project will be protected by security rules later.
-  - There is a second, more important key that we'll use later that *should* be hidden.
+- The apiKey just associates you with a Firebase project. We don't     need to hide it.
+- Your project will be protected by security rules later.
+- There is a second, more important key that we'll use later that *should* be hidden.
 - We're just pulling in `firebase/app` so that we don't end up pulling in more than we need in our client-side application.
 - We configure Firebase and then we'll export it for use in other places in our application.
 
@@ -77,7 +77,7 @@ First, let's pull in Cloud Firestore from our new `firebase.js` file.
 import { firestore } from '../firebase';
 ```
 
-Now, we'll get all of  the posts from Cloud Firestore whenenver the `Application` component mounts by using useEffect.
+Now, we'll get all of  the posts from Cloud Firestore whenever the `Application` component mounts by using useEffect.
 
 ```js
 useEffect(async()=>{
