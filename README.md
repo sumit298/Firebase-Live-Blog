@@ -408,3 +408,111 @@ Now In `CurrentUser.jsx`
 ```js
 <button onClick={signOut}>Sign Out</button>
 ```
+
+## Security Rules
+
+Up until now, everything has been wide open. That's not great. If we are going to push stuff to production, we're going to need to start adding some security to our application.
+
+Cloud Firestore rules always following this structure:
+
+```js
+service.cloud.firestore {
+  match /databases/{database}/documents{
+    // ..
+  }
+}
+```
+
+There is a nice query pattern for rules:
+
+```js
+service.cloud.firestore {
+  match /databases/{database}/documents {
+    match /posts/{postId} {
+      allow read: if <Condition>;
+      allow write: if <Condition>;
+    }
+  }
+}
+```
+
+You can combine them into one:
+
+```js
+service.cloud.firestore {
+  match /databases/{database}/documents{
+    match /posts/{postId}{
+      allow read, create, update: if <condition>;
+
+    }
+  }
+}
+```
+
+You can get a bit more detailed if you'd like:
+
+- `read`
+  - `get`
+  - `list`
+- `write`
+  - `create`
+  - `update`
+  - `delete`
+
+You can nest rules to sub-collections:
+
+```js
+service.cloud.firestore {
+  match /databases/{database}/documents {
+    match /posts/{postId}{
+      match /comments/{comment}{
+        allow read, write: if <condition>;
+      }
+    }
+  }
+}
+```
+
+If you want to go to arbitrary depth, then you can do {document=**}.
+
+**Important**: If multiple requests match, then the operation is allowed if any of them is true.
+
+### Some Practical Examples
+
+Only read or write if you are logged in.
+
+```javascript
+service.cloud.firestore {
+  match /databases/{database}/document{
+    // Allow the user to access documents in the "posts" collection
+    // only if they are authenticated
+    match /posts/{postId} {
+      allow read, write: if request.auth.id != null;
+    }
+  }
+}
+
+```
+
+Only read and write your own data:
+
+```js
+service.cloud.firestore{
+  match /databases/{database}/document{
+    match /users/{userId} {
+      allow read, update, delete: if request.auth.uid == userId;
+      allow create: if request.auth.uid != null;
+    }
+  }
+}
+```
+
+### Validating Based on the document
+
+- `resource.data` will have the fields on the document as it stored in the database.
+- `request.resource.data` will having the incoming document. (**Note**: This is all you have if you're responding to document creation.)
+
+### Accessing Other documents
+
+- `exists(/databases/$(database)/documents/users/$(request.auth.uid))` will verify that a document exists.
+- `get(/databases/$(database)/documents/users/$(request.auth.uid)).data` will get you the data of another document.
