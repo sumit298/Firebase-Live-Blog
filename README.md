@@ -499,6 +499,7 @@ service.cloud.firestore {
 ```
 
 Secure by owner, Has-one Relationship
+
 Only read and write your own data:
 
 ```js
