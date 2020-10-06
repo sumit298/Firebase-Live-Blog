@@ -451,13 +451,13 @@ service.cloud.firestore {
 
 You can get a bit more detailed if you'd like:
 
-- `read`
-  - `get`
-  - `list`
-- `write`
-  - `create`
-  - `update`
-  - `delete`
+- `read` - Applies to both lists and documents.
+  - `get` - When reading a single document.
+  - `list` - When querying a collection.
+- `write` - Applies rule to create, update, and delete.
+  - `create` - When setting new data with `docRef.set()` or `collectionRef.add()`
+  - `update` - When updating data with `docRef.update()` or `set()`
+  - `delete` - When deleting data with `docRef.delete()`
 
 You can nest rules to sub-collections:
 
@@ -477,6 +477,11 @@ If you want to go to arbitrary depth, then you can do {document=**}.
 
 **Important**: If multiple requests match, then the operation is allowed if any of them is true.
 
+### Validating Based on the document
+
+- `resource.data` will have the fields on the document as it stored in the database.
+- `request.resource.data` will having the incoming document. (**Note**: This is all you have if you're responding to document creation.)
+
 ### Some Practical Examples
 
 Only read or write if you are logged in.
@@ -491,28 +496,146 @@ service.cloud.firestore {
     }
   }
 }
-
 ```
 
+Secure by owner, Has-one Relationship
 Only read and write your own data:
 
 ```js
 service.cloud.firestore{
   match /databases/{database}/document{
     match /users/{userId} {
-      allow read, update, delete: if request.auth.uid == userId;
+      allow read, update, delete: if belongsTo(userId);
       allow create: if request.auth.uid != null;
+
+      function belongsTo(userId){
+          return request.auth.uid == userId;
+      }
     }
   }
 }
 ```
 
-### Validating Based on the document
+### Secure by Owner, Has-Many Relationship
 
-- `resource.data` will have the fields on the document as it stored in the database.
-- `request.resource.data` will having the incoming document. (**Note**: This is all you have if you're responding to document creation.)
+Sometimes a user will own many documents in a collection, so the Document ID will be different than the User ID. In this case, we can look at the request (create) and or the existing resource (delete), assuming it has a `uid` property to track the relationship. Example: user has-many posts.
+
+```js
+service.cloud.firestore{
+    match /databases/{database}/document{
+        match /posts/{postId}{
+            allow write: if requestMatchesUID();
+            allow update: if requestMatchesUID() && resourceMatchesUID();
+            allow delete: if resourceMatchesUID();
+        }
+
+        function requestMatchesUID(){
+            return request.auth.uid == request.resource.data.uid;
+        }
+
+        function resourceMatchesUID(){
+            return request.auth.uid == request.data.uid;
+        }
+    }
+}
+
+```
+
+Make all Collections Readable or Writable - Except One
+
+Let’s imagine you create collection names dynamically and want them to be unlocked by default. However, you have a special collection that requires strict rules. You start by locking down all paths, then dynamically pass the collection name in a rule. If the name does not equal the special collection then allow the operation.
+
+```js
+service.cloud.firestore{
+    match /{document=**}{
+        allow read, write: if false;
+    }
+
+    match /{collectionName}/{docId}{
+        allow read: if collectionName != 'special-collection';
+    }
+}
+```
+
+### Some Common Functions
+
+```js
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function emailVerified() {
+      return request.auth.token.email_verified;
+    }
+    function userExists() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    // [READ] Data that exists on the Firestore document
+    function existingData() {
+      return resource.data;
+    }
+    // [WRITE] Data that is sent to a Firestore document
+    function incomingData() {
+      return request.resource.data;
+    }
+
+    // Does the logged-in user match the requested userId?
+    function isUser(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Fetch a user from Firestore
+    function getUserData() {
+      return get(/databases/$(database)/documents/accounts/$(request.auth.uid)).data
+    }
+
+    // Fetch a user-specific field from Firestore
+    function userEmail(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data.email;
+    }
+
+
+    // example application for functions
+    match /orders/{orderId} {
+      allow create: if isSignedIn() && emailVerified() && isUser(incomingData().userId);
+      allow read, list, update, delete: if isSignedIn() && isUser(existingData().userId);
+    }
+
+  }
+}
+
+```
 
 ### Accessing Other documents
 
 - `exists(/databases/$(database)/documents/users/$(request.auth.uid))` will verify that a document exists.
 - `get(/databases/$(database)/documents/users/$(request.auth.uid)).data` will get you the data of another document.
+
+### Data Validation
+
+Now let’s combine some of the functions created earlier to build a robust validation rule. By chaining together rules with `&&` we can validate the data structure of multiple fields as an `AND` condition. We can also use `||` for OR conditions.
+
+```js
+
+// allow update: if isValidProduct();
+function isValidProduct() {
+  return incomingData().price > 10 && incomingData().name.size() < 50 && incomingData().category in ['widgets', 'things'] && existingData().locked == false && getUserData().admin == true
+}
+```
+
+### Time-Based Rules Examples
+
+Firestore also includes a `duration` helper to generate dates that can be operated upon. For example, we might want to throttle updates to 1 minute intervals. We can create this rule by comparing the `request.time` to a timestamp on the document + the throttle duration.
+
+```js
+// allow update: if isThrottled() == false;
+
+function isThrottled() {
+  return request.time < resource.data.lastUpdate + duration.value(1, 'm')
+}
+
+```
