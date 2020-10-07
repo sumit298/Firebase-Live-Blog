@@ -400,7 +400,7 @@ useEffect(()=>{
 In `firebase.js`
 
 ```js
-export const signOut = ()=>auth.signOut();
+export const signOut = () => auth.signOut();
 ```
 
 Now In `CurrentUser.jsx`

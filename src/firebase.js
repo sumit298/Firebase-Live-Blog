@@ -28,4 +28,37 @@ export const firestore = firebase.firestore();
 
 window.firebase = firebase;
 
+export const createUserProfileDocument = async (user, additionalData) => {
+	if (!user) return;
+
+	const userRef = firestore.doc(`users/${user.uid}`);
+	const snapshot = await userRef.get();
+	if (!snapshot.exists) {
+		const createdAt = new Date().toUTCString();
+		const { displayName,email, photoURL } = user;
+		try {
+			await userRef.set({
+				displayName,
+				photoURL,
+				email,
+				createdAt,
+				...additionalData,
+			});
+		} catch (error) {
+			console.error(error.message);
+		}
+	}
+	return getUserDocument(user.uid);
+};
+
+export const getUserDocument = async (uid) => {
+	if (!uid) return null;
+	try {
+		const userDocument = await firestore.collection('users').doc(uid).get();
+		return { uid, ...userDocument.data() };
+	} catch (error) {
+		console.error('Error Fetching User', error.message);
+	}
+};
+
 export default firebase;

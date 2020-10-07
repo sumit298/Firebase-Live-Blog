@@ -23,7 +23,8 @@ const AddPost = () => {
 			comments: 0,
 			createdAt: new Date().toUTCString(),
 		};
-
+		
+		// We are adding post to the firestore database.
 		firestore.collection('posts').doc().set(defaultPost);
 		setPost({ content: '', title: '' });
 	};

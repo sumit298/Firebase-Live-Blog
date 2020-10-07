@@ -2,7 +2,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import Authentication from './components/Authentication';
 import Posts from './components/Posts';
-import { firestore, auth } from './firebase';
+import { firestore, auth, createUserProfileDocument } from './firebase';
 import { collectIdAndData } from './utilities';
 
 function App() {
@@ -11,7 +11,7 @@ function App() {
 	});
 	const [user, setUser] = useState({
 		user: null,
-		userLoaded: false
+		userLoaded: false,
 	});
 
 	// snapshot = current state of the database in the firebase firestore.
@@ -26,11 +26,11 @@ function App() {
 				.onSnapshot((snapshot) => {
 					const posts = snapshot.docs.map(collectIdAndData);
 					setState({ posts });
-				
 				});
 		};
-		const getAuth = async () => {
-			unsubscribeFromAuth = await auth.onAuthStateChanged((user) => {
+		const getAuth =() => {
+			unsubscribeFromAuth = auth.onAuthStateChanged(async (userAuth) => {
+				const user = await createUserProfileDocument(userAuth);
 				console.log(user);
 				setUser({ user, userLoaded: true });
 			});
@@ -46,7 +46,6 @@ function App() {
 
 	return (
 		<main className="Application">
-			
 			<Authentication user={user.user} />
 			<Posts posts={state.posts} />
 		</main>
