@@ -17,7 +17,7 @@ function CurrentUser({
 				<div className="CurrentUser--information">
 					<h2>{displayName}</h2>
 					<p className="email">{email}</p>
-					<p className="created-at">{moment(createdAt.toDate()).calendar()}</p>
+					<p className="created-at">{moment(createdAt).calendar()}</p>
 					{/* <p className="last-sign-in">{metadata.lastSignInTime}</p> */}
 				</div>
 			</div>

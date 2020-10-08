@@ -3,12 +3,18 @@ import ReactDOM from 'react-dom';
 import './index.scss';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import PostProvider from './Context/PostsProvider';
+import UserProvider from './Context/UserProvider';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+	<React.StrictMode>
+			<PostProvider>
+		<UserProvider>
+				<App />
+		</UserProvider>
+			</PostProvider>
+	</React.StrictMode>,
+	document.getElementById('root')
 );
 
 // If you want your app to work offline and load faster, you can change
