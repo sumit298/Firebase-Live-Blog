@@ -449,7 +449,7 @@ service.cloud.firestore {
 }
 ```
 
-You can get a bit more detailed if you'd like:
+You can get a bit more granular if you'd like:
 
 - `read` - Applies to both lists and documents.
   - `get` - When reading a single document.
@@ -516,6 +516,20 @@ service.cloud.firestore{
   }
 }
 ```
+
+Create a rule that insists on title
+
+```js
+service.cloud.firestore{
+  match /databases/{database}/document{
+    match /posts/{postId}{
+      allow read;
+      allow create: if request.auth.uid != null && !request.resource.data.title;
+      allow update, delete: if request.auth.uid == resource.data.user.uid;
+    }
+  }
+}
+
 
 ### Secure by Owner, Has-Many Relationship
 
@@ -628,6 +642,9 @@ function isValidProduct() {
 }
 ```
 
+- You can limit the size of a query so that malicious users (or you after a big lunch) can't run expensive queries
+  - `allow list: if request.query.limit <= 10;`
+
 ### Time-Based Rules Examples
 
 Firestore also includes a `duration` helper to generate dates that can be operated upon. For example, we might want to throttle updates to 1 minute intervals. We can create this rule by comparing the `request.time` to a timestamp on the document + the throttle duration.
@@ -639,4 +656,112 @@ function isThrottled() {
   return request.time < resource.data.lastUpdate + duration.value(1, 'm')
 }
 
+```
+
+## Implementing Sign In with Email Authentication
+
+In `SignUp.jsx`
+
+```js
+
+const handleSubmit = async (event) =>{
+  event.preventDefault();
+  const { displayName, email, password} = signUpState;
+  try{
+    const { user } = await auth.createUserWithEmailAndPassword(email, password);
+
+    user.updateProfile({displayName})
+  }
+  catch(error){
+    console.error(error.message);
+  }
+  setSignUpState({ displayName: '', email: '', password: '' })
+}
+
+```
+
+Now this has some problems
+
+- The display name would not update immediately, because see in try block we are creating user with passing email and password first and then we are updating profile of user with `displayName`;
+- There is not `photoURL` which we are getting free from google signIn or facebook signIn.
+- we may want to store other information beyond what we get from user profile.
+
+Now what we can do?
+we can create documents for user profile in Cloud Firestore.
+
+## Storing User Profile in Cloud Firestore
+
+The information on the user object seems great, but we going to run into limitations *real* quick.
+
+- What if we want to let the user set bio or something?
+- What if we want to set admin permissions on the users?
+- What if we want to keep track of posts a user has liked?
+
+There are many more possibilities, right?
+
+The solution is, we will make documents based off the users uid in Cloud firestore.
+
+In `firebase.js`
+
+```js
+export const createUserProfileDocument = async (user, additionalData)=>{
+  // If there is no user, let's not create his document.
+  if(!user) return;
+
+  // Getting a reference to the location in the firestore where the user document may or may not exist.
+  const userRef = firestore.doc(`users/${user.uid}`);
+
+  // Go and fetch document from that location
+  const snapshot = await userRef.get();
+
+  // If there is not a document for the user. Let's use information that we got from either Google or our sign in form.
+
+  if(!snapshot.exists){
+    const {displayName, email, photoURL} = user;
+    const createdAt =  new Date().toUTCString();
+    try{
+      await userRef.set({
+        displayName,
+        email,
+        createdAt,
+        ...additionalData
+      })
+    }
+    catch(error){
+      console.error("Error Creating User",error.message);
+    }
+  }
+
+  // Get the document and return it, since that's we are likely want to do next.
+  return getUserDocument(user.uid);
+};
+
+export const getUserDocument = async (uid)=>{
+
+  if(!uid) return null;
+  try{
+    // Getting uid of the users document
+    const userDocument = await firestore.collection('users').doc('uid').get();
+
+    // Returning uid and all the saved data in the user document.
+    return { uid , ...userDocument.data()}
+  }
+  catch(error){
+    console.error("Error Fetching User", error.message);
+  }
+}
+```
+
+I am going to put it into two places:
+
+- `onAuthStateChanged` in order to get google sign Ups
+- In `handleSubmit` in `SignUp` because there's we will display custom displayName.
+
+### Updating Security Rules
+
+```js
+match /users/{userId} {
+  allow read;
+  allow write: if request.auth.uid == userId;
+}
 ```
