@@ -415,7 +415,7 @@ Up until now, everything has been wide open. That's not great. If we are going t
 
 Cloud Firestore rules always following this structure:
 
-```js
+```javascript
 service.cloud.firestore {
   match /databases/{database}/documents{
     // ..
@@ -530,6 +530,7 @@ service.cloud.firestore{
   }
 }
 
+```
 
 ### Secure by Owner, Has-Many Relationship
 
