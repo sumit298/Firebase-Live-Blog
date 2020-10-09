@@ -25,7 +25,6 @@ const UserProvider = ({ children }) => {
 			unsubscribeFromAuth();
 		};
 	}, []);
-	
 
 	const { user, userLoaded } = state;
 

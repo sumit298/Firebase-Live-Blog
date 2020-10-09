@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { firestore} from '../firebase';
-import { collectIdAndData} from '../utilities'
- 
+import { firestore } from '../firebase';
+import { collectIdAndData } from '../utilities';
+
 export const PostContext = createContext();
 
 const PostProvider = ({ children }) => {

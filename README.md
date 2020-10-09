@@ -766,3 +766,193 @@ match /users/{userId} {
   allow write: if request.auth.uid == userId;
 }
 ```
+
+## Modern State Management in React with Firebase
+
+We have a small bug. For our first-time email users, we'll still get null for their display name.
+
+We could solve all of this by passing everything down from the Application component, but I feel like we might be able do a little better.
+
+We could wrap everything in HOCs, but that might also end us up in a position where we make additional queries to Cloud Firestore. This isn't ideal, but it's probably not the biggest problem in the world.
+
+We could use something big like Redux. But that for some other project.
+
+But for this, I am using Context API.
+As currently firebase does our actions in the state, that's why I am not using any useReducer, but who knows in future I will.
+
+In `PostProvider.jsx`
+
+```js
+import React, { createContext, useState, useEffect } from 'react';
+import { firestore} from '../firebase';
+import { collectIdAndData} from '../utilities'
+
+export const PostContext = createContext();
+
+const PostProvider = ({ children }) => {
+  const [state, setState] = useState({
+    posts: [],
+  });
+  
+  useEffect(() => {
+    let unsubscribeFromFirestore = null;
+
+    const getData = async () => {
+      unsubscribeFromFirestore = await firestore
+        .collection('posts')
+        .orderBy('createdAt', 'desc')
+        .onSnapshot((snapshot) => {
+          const posts = snapshot.docs.map(collectIdAndData);
+          setState({ posts });
+      });
+    };
+
+    getData();
+    return () => {
+    unsubscribeFromFirestore();
+    };
+  }, []);
+  const { posts } = state;
+
+  return <PostContext.Provider value={posts}>{children}</PostContext.Provider>;
+};
+
+export default PostProvider;
+
+```
+
+Hooking up the Post Provider
+
+In `index.js`:
+
+```js
+import PostsProvider from './contexts/PostsProvider';
+
+ReactDOM.render(
+  <PostsProvider>
+    <App/>
+  </PostsProvider>,
+  document.getElementById('root'),
+);
+
+```
+
+Now in `Post.jsx`
+
+```js
+import React, { useContext } from 'react';
+import { PostContext } from '../Context/PostsProvider';
+import AddPost from './AddPost';
+import Post from './Post';
+
+function Posts() {
+  const posts = useContext(PostContext);
+  return (
+  <section className="posts">
+    <AddPost />
+      {posts.map((post) => (
+      <Post {...post} id={post.id} key={post.id} />)
+      )}
+  </section>);
+}
+
+export default Posts;
+
+```
+
+Similarly for our User's state,
+
+In `UserProvider.jsx`
+
+```js
+
+import React, { createContext, useState, useEffect } from 'react';
+import { auth, createUserProfileDocument } from '../firebase';
+
+export const UserContext = createContext();
+
+const UserProvider = ({ children }) => {
+  const [state, setState] = useState({
+    user: null,
+    userLoaded: true,
+  });
+
+  useEffect(() => {
+    let unsubscribeFromAuth = null;
+
+    const getAuth = async () => {
+      unsubscribeFromAuth = auth.onAuthStateChanged(async (userAuth) => {
+        const user = await createUserProfileDocument(userAuth);
+        // console.log(user);
+        setState({ user, userLoaded: false });
+      });
+    };
+
+    getAuth();
+    return () => {
+      unsubscribeFromAuth();
+    };
+  }, []);
+
+
+  const { user, userLoaded } = state;
+
+  return (
+    <UserContext.Provider value={{ user, userLoaded }}>
+      {children}
+    </UserContext.Provider>
+  );
+};
+
+export default UserProvider;
+
+```
+
+Now similarly wrapping `UserProvider` component in `index.js`
+
+```js
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.scss';
+import App from './App';
+import * as serviceWorker from './serviceWorker';
+import PostProvider from './Context/PostsProvider';
+import UserProvider from './Context/UserProvider';
+
+ReactDOM.render(
+  <React.StrictMode>
+    <PostProvider>
+      <UserProvider>
+      <App />
+      </UserProvider>
+    </PostProvider>
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+
+```
+
+Now in `Authentication.js`
+
+```js
+
+import React, { useContext } from 'react'
+import SignInAndSignUp from './SignInAndSignUp';
+import CurrentUser from './CurrentUser';
+import { UserContext } from '../Context/UserProvider';
+
+
+function Authentication() {
+    const {user, userLoaded} = useContext(UserContext);
+    if(userLoaded) return null;
+    // console.log(user);
+    return (
+        <div>
+            {user ? <CurrentUser {...user}/> : <SignInAndSignUp/>}
+        </div>
+    )
+}
+
+export default Authentication
+```
