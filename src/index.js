@@ -5,14 +5,17 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import PostProvider from './Context/PostsProvider';
 import UserProvider from './Context/UserProvider';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 ReactDOM.render(
 	<React.StrictMode>
+		<Router>
 			<PostProvider>
-		<UserProvider>
-				<App />
-		</UserProvider>
+				<UserProvider>
+					<App />
+				</UserProvider>
 			</PostProvider>
+		</Router>
 	</React.StrictMode>,
 	document.getElementById('root')
 );
