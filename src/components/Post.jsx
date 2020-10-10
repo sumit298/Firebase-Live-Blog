@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import moment from 'moment';
+
 import { firestore } from '../firebase';
+import { UserContext } from '../Context/UserProvider';
 
 const Post = ({ id, title, content, user, createdAt, stars, comments }) => {
+	const currentUser = useContext(UserContext);
+	const belongsToCurrentUser = (currentUser, postAuthor) => {
+		if (!currentUser) return false;
+		return currentUser.uid === postAuthor.uid;
+	};
 	const postRef = firestore.doc(`posts/${id}`);
 	const remove = () => postRef.delete();
 	const addStar = () =>
@@ -19,7 +26,7 @@ const Post = ({ id, title, content, user, createdAt, stars, comments }) => {
 			</div>
 			<div className="Post--meta">
 				<div>
-					<p >
+					<p>
 						<span role="img" aria-label="star">
 							⭐️
 						</span>
@@ -35,10 +42,14 @@ const Post = ({ id, title, content, user, createdAt, stars, comments }) => {
 					<p>{moment(createdAt).calendar()}</p>
 				</div>
 				<div>
-					<button onClick={addStar} className="star">Star</button>
-					<button className="delete" onClick={remove}>
-						Delete
+					<button onClick={addStar} className="star">
+						Star
 					</button>
+					{belongsToCurrentUser(currentUser.user, user) && (
+						<button className="delete" onClick={remove}>
+							Delete
+						</button>
+					)}
 				</div>
 			</div>
 		</article>
@@ -52,7 +63,7 @@ Post.defaultProps = {
 		email: 'billmurray@mailinator.com',
 		photoURL: 'https://www.fillmurray.com/300/300',
 	},
-	// createdAt: new Date(),
+
 	stars: 0,
 	comments: 0,
 };

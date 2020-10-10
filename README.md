@@ -956,3 +956,5 @@ function Authentication() {
 
 export default Authentication
 ```
+
+## Some UI Changes

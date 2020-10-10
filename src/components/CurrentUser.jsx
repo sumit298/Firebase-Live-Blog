@@ -2,14 +2,13 @@ import React from 'react';
 import moment from 'moment';
 import { signOut } from '../firebase';
 // Children???
-function CurrentUser({
-	// metadata,
-	displayName,
-	email,
-	photoURL,
-	createdAt,
-	children,
-}) {
+function CurrentUser(props)
+ {
+	 const { displayName,
+		email,
+		photoURL,
+		createdAt, children} = props;
+		// console.log(metadata);
 	return (
 		<section className="CurrentUser">
 			<div className="CurrentUser--profile">
