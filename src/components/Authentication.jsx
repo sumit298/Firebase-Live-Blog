@@ -5,8 +5,8 @@ import { UserContext } from '../Context/UserProvider';
 
 
 function Authentication() {
-    const {user, userLoaded} = useContext(UserContext);
-    // if(userLoaded) return null;
+    const {user} = useContext(UserContext);
+    // if(!userLoaded) return null;
     // console.log(user);
     return (
         <div>

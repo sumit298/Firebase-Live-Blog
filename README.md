@@ -958,3 +958,151 @@ export default Authentication
 ```
 
 ## Some UI Changes
+
+Now let's implement code to hide the delete button if it is not your post. In security rules also we had wrote rules so that the original user can edit and delete their post.
+
+And because of context API we can reach to our state whichever from component we want.
+
+In `Post.jsx`
+
+```js
+// Importing state from `UserProvider`
+const currentUser = useContext(UserProvider);
+
+
+// Here I am creating a little helper function
+const belongsToCurrentUser = (currentUser, postAuthor)=>{
+
+  if(!currentUser) return false;
+  return currentUser.uid === postAuthor.uid;
+}
+
+// Now in delete button
+{belongsToCurrentUser(currentUser.user, user) &&  (
+  <button className="delete" onClick={remove}>
+    Delete
+  </button>
+  )
+}
+
+```
+
+## Creating a User Profile Page
+
+This is the page where we can edit profile photos and displayName.
+
+Here I am implementing React Router. So for setup:
+
+In `index.js`
+
+```js
+import {BrowserRouter as Router} from 'react-router-dom'
+
+ReactDOM.render(
+  <Router>
+    <UserProvider>
+      <PostProvider>
+        <App/>
+      </PostProvider>
+    </UserProvider>
+  </Router>,
+  document.getElementById('root');
+);
+
+```
+
+In `App.js`
+
+```js
+import React from 'react';
+import Authentication from './components/Authentication';
+import Posts from './components/Posts';
+import { Switch, Route, Link } from 'react-router-dom';
+import UserProfile from './UserProfile';
+
+function App() {
+  return (
+    <main className="Application">
+      <Link className="links" to="/">
+        <h1>My Blogger</h1>
+      </Link>
+
+      <Authentication />
+      <Switch>
+        <Route exact path="/profile" component={UserProfile}></Route>
+        <Route exact path="/" component={Posts}></Route>
+      </Switch>
+    </main>
+  );
+}
+
+export default App;
+
+```
+
+In `CurrentUser.jsx`
+
+```js
+<Link to="/profile"><h2>{displayName}</h2></Link>
+```
+
+Okay, let's implement `UserProfile` page
+
+```js
+import { auth } from './firebase';
+import React, { useRef, useState } from 'react';
+import { firestore } from './firebase';
+
+const UserProfile = () => {
+  const [state, setState] = useState({
+    displayName: '',
+  });
+
+  // Implementation can be wrong!
+  const imageInput = useRef(null);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setState({ [name]: value });
+  };
+
+  const uid = () => {
+    return auth.currentUser.uid;
+  };
+
+  const userRef = () => {
+    return firestore.doc(`users/${uid()}`);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    const { displayName } = state;
+    if (displayName) {
+      userRef().update({
+        displayName,
+      });
+    }
+  };
+
+  const { displayName } = state;
+  return (
+    <section className="UserProfile">
+      <form onSubmit={handleSubmit} className="UpdateUser">
+        <input
+          type="text"
+          name="displayName"
+          value={displayName}
+          onChange={handleChange}
+          placeholder="Enter display name."
+        />
+        <input type="file" ref={imageInput.current} name="image-upload" />
+        <input className="update" type="submit" />
+      </form>
+    </section>
+  );
+};
+
+export default UserProfile;
+
+```

@@ -7,14 +7,16 @@ import UserProfile from './UserProfile';
 function App() {
 	return (
 		<main className="Application">
-			<Link className="links" to="/"><h1>My Blogger</h1></Link>
+			<Link className="links" to="/">
+				<h1>My Blogger</h1>
+			</Link>
 
 			<Authentication />
 			<Switch>
 				<Route exact path="/profile" component={UserProfile}></Route>
 				<Route exact path="/" component={Posts}></Route>
 			</Switch>
-		</main> 
+		</main>
 	);
 }
 

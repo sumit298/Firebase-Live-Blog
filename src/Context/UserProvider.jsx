@@ -6,7 +6,7 @@ export const UserContext = createContext();
 const UserProvider = ({ children }) => {
 	const [state, setState] = useState({
 		user: null,
-		userLoaded: true,
+		// userLoaded: true,
 	});
 
 	useEffect(() => {
@@ -20,7 +20,7 @@ const UserProvider = ({ children }) => {
 					setState({user: {uid: snapshot.id, ...snapshot.data()}})
 				})
 				// console.log(user);
-				setState({ user, userLoaded: false });
+				setState({user: userAuth });
 				}
 			});
 		};
@@ -31,10 +31,10 @@ const UserProvider = ({ children }) => {
 		};
 	}, []);
 
-	const { user, userLoaded } = state;
+	const { user } = state;
 
 	return (
-		<UserContext.Provider value={{ user, userLoaded }}>
+		<UserContext.Provider value={{ user }}>
 			{children}
 		</UserContext.Provider>
 	);
