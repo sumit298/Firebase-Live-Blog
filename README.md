@@ -14,18 +14,18 @@
 Let's make a new file called 'firebase.js'.
 
 ```js
-import firebase from 'firebase/app';
+import firebase from "firebase/app";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: 'AIzaSyBW-2gHAbTDei5kpnx2U_aG-LJTxrgwrt0',
-    authDomain: 'fir-live-blog-d6f43.firebaseapp.com',
-    databaseURL: 'https://fir-live-blog-d6f43.firebaseio.com',
-    projectId: 'fir-live-blog-d6f43',
-    storageBucket: 'fir-live-blog-d6f43.appspot.com',
-    messagingSenderId: '823090351833',
-    appId: '1:823090351833:web:e0ee06bcfd03f95a8678c8',
-    measurementId: 'G-D890YWLKGL',
+  apiKey: "AIzaSyBW-2gHAbTDei5kpnx2U_aG-LJTxrgwrt0",
+  authDomain: "fir-live-blog-d6f43.firebaseapp.com",
+  databaseURL: "https://fir-live-blog-d6f43.firebaseio.com",
+  projectId: "fir-live-blog-d6f43",
+  storageBucket: "fir-live-blog-d6f43.appspot.com",
+  messagingSenderId: "823090351833",
+  appId: "1:823090351833:web:e0ee06bcfd03f95a8678c8",
+  measurementId: "G-D890YWLKGL",
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -35,34 +35,33 @@ export default firebase;
 
 Some Important Points:
 
-- The apiKey just associates you with a Firebase project. We don't     need to hide it.
+- The apiKey just associates you with a Firebase project. We don't need to hide it.
 - Your project will be protected by security rules later.
-- There is a second, more important key that we'll use later that *should* be hidden.
+- There is a second, more important key that we'll use later that _should_ be hidden.
 - We're just pulling in `firebase/app` so that we don't end up pulling in more than we need in our client-side application.
 - We configure Firebase and then we'll export it for use in other places in our application.
 
 ## Setting up cloud firestore
 
 ```js
-import firebase from 'firebase/app';
-import 'firebase/firestore'; //New
+import firebase from "firebase/app";
+import "firebase/firestore"; //New
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: 'AIzaSyBW-2gHAbTDei5kpnx2U_aG-LJTxrgwrt0',
-    authDomain: 'fir-live-blog-d6f43.firebaseapp.com',
-    databaseURL: 'https://fir-live-blog-d6f43.firebaseio.com',
-    projectId: 'fir-live-blog-d6f43',
-    storageBucket: 'fir-live-blog-d6f43.appspot.com',
-    messagingSenderId: '823090351833',
-    appId: '1:823090351833:web:e0ee06bcfd03f95a8678c8',
-    measurementId: 'G-D890YWLKGL',
+  apiKey: "AIzaSyBW-2gHAbTDei5kpnx2U_aG-LJTxrgwrt0",
+  authDomain: "fir-live-blog-d6f43.firebaseapp.com",
+  databaseURL: "https://fir-live-blog-d6f43.firebaseio.com",
+  projectId: "fir-live-blog-d6f43",
+  storageBucket: "fir-live-blog-d6f43.appspot.com",
+  messagingSenderId: "823090351833",
+  appId: "1:823090351833:web:e0ee06bcfd03f95a8678c8",
+  measurementId: "G-D890YWLKGL",
 };
 
 firebase.initializeApp(firebaseConfig);
 export const firestore = firebase.firestore(); //NEW
 export default firebase;
-
 ```
 
 ## Cloud Firestore
@@ -74,17 +73,16 @@ Let's start by fetching posts whenever the 'Application' component by using useE
 First, let's pull in Cloud Firestore from our new `firebase.js` file.
 
 ```js
-import { firestore } from '../firebase';
+import { firestore } from "../firebase";
 ```
 
-Now, we'll get all of  the posts from Cloud Firestore whenever the `Application` component mounts by using useEffect.
+Now, we'll get all of the posts from Cloud Firestore whenever the `Application` component mounts by using useEffect.
 
 ```js
-useEffect(async()=>{
-  const posts = await firestore.collection('posts').get();
-  console.log({posts})
-})
-
+useEffect(async () => {
+  const posts = await firestore.collection("posts").get();
+  console.log({ posts });
+});
 ```
 
 Hmm.. that looks like a `QuerySnapShot` not our posts. What is that?
@@ -117,18 +115,17 @@ My Method:
 
 ```js
 useEffect(() => {
- const getData = async () => {
-  const snapShot = firestore.collection('posts').onSnapshot((snapshot) => {
-  return snapshot.forEach((doc) => {
-     const id = doc.id;
-     const data = doc.data();
-      console.log({ id, data });
+  const getData = async () => {
+    const snapShot = firestore.collection("posts").onSnapshot((snapshot) => {
+      return snapshot.forEach((doc) => {
+        const id = doc.id;
+        const data = doc.data();
+        console.log({ id, data });
+      });
     });
-   });
   };
   getData();
- }, []);
-
+}, []);
 ```
 
 You should see results in the console.
@@ -136,15 +133,16 @@ You should see results in the console.
 Setting it to the setState to actually render some data in the app which we get from the application.
 
 ```js
-useEffect(()=>{
-  const getData = async ()=>{
-    const snapShot = await firebase.collection('posts').get();
-    const posts = snapShot.docs.map(doc=> {return { id: doc.id, ...doc.data()}});
-   setState({posts});
-  }
+useEffect(() => {
+  const getData = async () => {
+    const snapShot = await firebase.collection("posts").get();
+    const posts = snapShot.docs.map((doc) => {
+      return { id: doc.id, ...doc.data() };
+    });
+    setState({ posts });
+  };
   getData();
-},[])
-
+}, []);
 ```
 
 For sake of simplicity and reusability,
@@ -152,28 +150,28 @@ For sake of simplicity and reusability,
 An aside, combining the document IDs with the data is something we're going to be doing a lot. Let's make a utility method in `utilities.js`:
 
 ```js
-export const collectIdsAndData = doc => ({ id: doc.id, ...doc.data() })
+export const collectIdsAndData = (doc) => ({ id: doc.id, ...doc.data() });
 ```
 
 Now, we will refactor our code as follows in `App.js`:
 
 ```js
-useEffect(()=>{
-  const getData = async ()=>{
-    const snapShot = await firestore.collection('posts').get();
+useEffect(() => {
+  const getData = async () => {
+    const snapShot = await firestore.collection("posts").get();
     const posts = snapShot.docs.map(collectIdsAndData);
 
-    setState({posts});
-  }
+    setState({ posts });
+  };
   getData();
-},[])
+}, []);
 ```
 
 Now, we can get rid of predefined posts in state.
 
 ```js
 const [state, setState] = useState({
- posts: [],
+  posts: [],
 });
 ```
 
@@ -200,16 +198,15 @@ First of all, we need to get rid of that `Date.now()` based `id` in `AddPost`. I
 In `App.js`
 
 I will fix later but for now I am passing this function via props.
-from App.js => Posts.js => Post.js  i.e Prop drilling.
+from App.js => Posts.js => Post.js i.e Prop drilling.
 
 ```js
-
-const handleRemove = async (id)=>{
+const handleRemove = async (id) => {
   const allPosts = state.posts;
   await firestore.doc(`/posts/${id}`).delete();
-  const posts = allPosts.filter(post=> post.id !== id);
-  setState({posts});
-}
+  const posts = allPosts.filter((post) => post.id !== id);
+  setState({ posts });
+};
 ```
 
 ### Subscribing to Changes
@@ -249,17 +246,17 @@ does this automatically i will remove some code which are passed through props f
 In `Post.jsx`
 
 ```js
-  // Grabbing id of the document and deleting them.
-  const postRef = firestore.doc(`posts/${id}`);
-  const remove = ()=>postRef.delete()
-  // Passing this remove function to the delete button
+// Grabbing id of the document and deleting them.
+const postRef = firestore.doc(`posts/${id}`);
+const remove = () => postRef.delete();
+// Passing this remove function to the delete button
 ```
 
 In `AddPost.jsx`
 
 ```js
-  // Idk why doc() is working? will figure it out later.
-  firestore.collection('posts').doc().set(defaultPost);
+// Idk why doc() is working? will figure it out later.
+firestore.collection("posts").doc().set(defaultPost);
 ```
 
 In `App.jsx`:
@@ -300,7 +297,7 @@ Now currently is not the best way to do this, but I will update it later.
 
 ```js
 const postRef = firestore.doc(`posts/${id}`);
-const addStar = ()=> postRef.update({ stars: stars + 1});
+const addStar = () => postRef.update({ stars: stars + 1 });
 // Now passing this function to the star button by using onClick event.
 ```
 
@@ -316,7 +313,7 @@ First, let's head over to the dashboard and turn on some authentication. We'll b
 - Google sign-in
 - Github sign-in
 - Facebook sign-in
-  
+
 Let's enable this on firebase console.
 
 Google authentication will not require to register our app explicitly.
@@ -325,9 +322,9 @@ but for github and facebook sign-in we will have to register our app in their co
 ### Writing the current user up to the application state
 
 ```js
-  const [user, setUser] = useState({
-    user: null
-  })
+const [user, setUser] = useState({
+  user: null,
+});
 ```
 
 Cool.We have a `CurrentUser`, `SignIn`, and `SignUp` components ready to rock.
@@ -337,7 +334,7 @@ We're going to start with Google Sign-in because I can assume you have a Google 
 In `firebase.js`:
 
 ```js
-import 'firebase/auth';
+import "firebase/auth";
 
 // ...
 export const auth = firebase.auth();
@@ -365,34 +362,35 @@ same goes with facebook and github sign in.
 In `App.js`
 
 ```js
-useEffect(()=>{
+useEffect(() => {
   let unsubscribeFromFirestore = null;
   let unsubscribeFromAuth = null;
 
-  const getData = async ()=>{
-    unsubscribeFromFirestore = await firestore.collection('posts').orderBy('createdAt', 'desc').onSnapshot(snapshot=>{
-      const posts = snapshot.docs.map(collectIdAndData);
-      setState({posts});
-    });
+  const getData = async () => {
+    unsubscribeFromFirestore = await firestore
+      .collection("posts")
+      .orderBy("createdAt", "desc")
+      .onSnapshot((snapshot) => {
+        const posts = snapshot.docs.map(collectIdAndData);
+        setState({ posts });
+      });
   };
 
-  const getAuth = async ()=>{
+  const getAuth = async () => {
     // OnAuthStateChanged method is for when user login, we will get user information and when user logout then user will set back to null.
-    unsubscribeFromAuth = await auth.onAuthStateChanged(user=>{
-      setState({user});
-    })
-  }
+    unsubscribeFromAuth = await auth.onAuthStateChanged((user) => {
+      setState({ user });
+    });
+  };
 
   getData();
   getAuth();
 
-  return ()=>{
+  return () => {
     unsubscribeFromFirestore();
     unsubscribeFromAuth();
-  }
-
-},[])
-
+  };
+}, []);
 ```
 
 ### SignOut
@@ -473,7 +471,7 @@ service.cloud.firestore {
 }
 ```
 
-If you want to go to arbitrary depth, then you can do {document=**}.
+If you want to go to arbitrary depth, then you can do {document=\*\*}.
 
 **Important**: If multiple requests match, then the operation is allowed if any of them is true.
 
@@ -636,10 +634,15 @@ service cloud.firestore {
 Now let’s combine some of the functions created earlier to build a robust validation rule. By chaining together rules with `&&` we can validate the data structure of multiple fields as an `AND` condition. We can also use `||` for OR conditions.
 
 ```js
-
 // allow update: if isValidProduct();
 function isValidProduct() {
-  return incomingData().price > 10 && incomingData().name.size() < 50 && incomingData().category in ['widgets', 'things'] && existingData().locked == false && getUserData().admin == true
+  return (
+    incomingData().price > 10 &&
+    incomingData().name.size() < 50 &&
+    incomingData().category in ["widgets", "things"] &&
+    existingData().locked == false &&
+    getUserData().admin == true
+  );
 }
 ```
 
@@ -654,9 +657,8 @@ Firestore also includes a `duration` helper to generate dates that can be operat
 // allow update: if isThrottled() == false;
 
 function isThrottled() {
-  return request.time < resource.data.lastUpdate + duration.value(1, 'm')
+  return request.time < resource.data.lastUpdate + duration.value(1, "m");
 }
-
 ```
 
 ## Implementing Sign In with Email Authentication
@@ -664,21 +666,18 @@ function isThrottled() {
 In `SignUp.jsx`
 
 ```js
-
-const handleSubmit = async (event) =>{
+const handleSubmit = async (event) => {
   event.preventDefault();
-  const { displayName, email, password} = signUpState;
-  try{
+  const { displayName, email, password } = signUpState;
+  try {
     const { user } = await auth.createUserWithEmailAndPassword(email, password);
 
-    user.updateProfile({displayName})
-  }
-  catch(error){
+    user.updateProfile({ displayName });
+  } catch (error) {
     console.error(error.message);
   }
-  setSignUpState({ displayName: '', email: '', password: '' })
-}
-
+  setSignUpState({ displayName: "", email: "", password: "" });
+};
 ```
 
 Now this has some problems
@@ -692,7 +691,7 @@ we can create documents for user profile in Cloud Firestore.
 
 ## Storing User Profile in Cloud Firestore
 
-The information on the user object seems great, but we going to run into limitations *real* quick.
+The information on the user object seems great, but we going to run into limitations _real_ quick.
 
 - What if we want to let the user set bio or something?
 - What if we want to set admin permissions on the users?
@@ -705,9 +704,9 @@ The solution is, we will make documents based off the users uid in Cloud firesto
 In `firebase.js`
 
 ```js
-export const createUserProfileDocument = async (user, additionalData)=>{
+export const createUserProfileDocument = async (user, additionalData) => {
   // If there is no user, let's not create his document.
-  if(!user) return;
+  if (!user) return;
 
   // Getting a reference to the location in the firestore where the user document may or may not exist.
   const userRef = firestore.doc(`users/${user.uid}`);
@@ -717,19 +716,18 @@ export const createUserProfileDocument = async (user, additionalData)=>{
 
   // If there is not a document for the user. Let's use information that we got from either Google or our sign in form.
 
-  if(!snapshot.exists){
-    const {displayName, email, photoURL} = user;
-    const createdAt =  new Date().toUTCString();
-    try{
+  if (!snapshot.exists) {
+    const { displayName, email, photoURL } = user;
+    const createdAt = new Date().toUTCString();
+    try {
       await userRef.set({
         displayName,
         email,
         createdAt,
-        ...additionalData
-      })
-    }
-    catch(error){
-      console.error("Error Creating User",error.message);
+        ...additionalData,
+      });
+    } catch (error) {
+      console.error("Error Creating User", error.message);
     }
   }
 
@@ -737,20 +735,18 @@ export const createUserProfileDocument = async (user, additionalData)=>{
   return getUserDocument(user.uid);
 };
 
-export const getUserDocument = async (uid)=>{
-
-  if(!uid) return null;
-  try{
+export const getUserDocument = async (uid) => {
+  if (!uid) return null;
+  try {
     // Getting uid of the users document
-    const userDocument = await firestore.collection('users').doc('uid').get();
+    const userDocument = await firestore.collection("users").doc("uid").get();
 
     // Returning uid and all the saved data in the user document.
-    return { uid , ...userDocument.data()}
-  }
-  catch(error){
+    return { uid, ...userDocument.data() };
+  } catch (error) {
     console.error("Error Fetching User", error.message);
   }
-}
+};
 ```
 
 I am going to put it into two places:
@@ -783,9 +779,9 @@ As currently firebase does our actions in the state, that's why I am not using a
 In `PostProvider.jsx`
 
 ```js
-import React, { createContext, useState, useEffect } from 'react';
-import { firestore} from '../firebase';
-import { collectIdAndData} from '../utilities'
+import React, { createContext, useState, useEffect } from "react";
+import { firestore } from "../firebase";
+import { collectIdAndData } from "../utilities";
 
 export const PostContext = createContext();
 
@@ -793,23 +789,23 @@ const PostProvider = ({ children }) => {
   const [state, setState] = useState({
     posts: [],
   });
-  
+
   useEffect(() => {
     let unsubscribeFromFirestore = null;
 
     const getData = async () => {
       unsubscribeFromFirestore = await firestore
-        .collection('posts')
-        .orderBy('createdAt', 'desc')
+        .collection("posts")
+        .orderBy("createdAt", "desc")
         .onSnapshot((snapshot) => {
           const posts = snapshot.docs.map(collectIdAndData);
           setState({ posts });
-      });
+        });
     };
 
     getData();
     return () => {
-    unsubscribeFromFirestore();
+      unsubscribeFromFirestore();
     };
   }, []);
   const { posts } = state;
@@ -818,7 +814,6 @@ const PostProvider = ({ children }) => {
 };
 
 export default PostProvider;
-
 ```
 
 Hooking up the Post Provider
@@ -826,38 +821,37 @@ Hooking up the Post Provider
 In `index.js`:
 
 ```js
-import PostsProvider from './contexts/PostsProvider';
+import PostsProvider from "./contexts/PostsProvider";
 
 ReactDOM.render(
   <PostsProvider>
-    <App/>
+    <App />
   </PostsProvider>,
-  document.getElementById('root'),
+  document.getElementById("root")
 );
-
 ```
 
 Now in `Post.jsx`
 
 ```js
-import React, { useContext } from 'react';
-import { PostContext } from '../Context/PostsProvider';
-import AddPost from './AddPost';
-import Post from './Post';
+import React, { useContext } from "react";
+import { PostContext } from "../Context/PostsProvider";
+import AddPost from "./AddPost";
+import Post from "./Post";
 
 function Posts() {
   const posts = useContext(PostContext);
   return (
-  <section className="posts">
-    <AddPost />
+    <section className="posts">
+      <AddPost />
       {posts.map((post) => (
-      <Post {...post} id={post.id} key={post.id} />)
-      )}
-  </section>);
+        <Post {...post} id={post.id} key={post.id} />
+      ))}
+    </section>
+  );
 }
 
 export default Posts;
-
 ```
 
 Similarly for our User's state,
@@ -865,9 +859,8 @@ Similarly for our User's state,
 In `UserProvider.jsx`
 
 ```js
-
-import React, { createContext, useState, useEffect } from 'react';
-import { auth, createUserProfileDocument } from '../firebase';
+import React, { createContext, useState, useEffect } from "react";
+import { auth, createUserProfileDocument } from "../firebase";
 
 export const UserContext = createContext();
 
@@ -894,7 +887,6 @@ const UserProvider = ({ children }) => {
     };
   }, []);
 
-
   const { user, userLoaded } = state;
 
   return (
@@ -905,56 +897,47 @@ const UserProvider = ({ children }) => {
 };
 
 export default UserProvider;
-
 ```
 
 Now similarly wrapping `UserProvider` component in `index.js`
 
 ```js
-
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.scss';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
-import PostProvider from './Context/PostsProvider';
-import UserProvider from './Context/UserProvider';
+import React from "react";
+import ReactDOM from "react-dom";
+import "./index.scss";
+import App from "./App";
+import * as serviceWorker from "./serviceWorker";
+import PostProvider from "./Context/PostsProvider";
+import UserProvider from "./Context/UserProvider";
 
 ReactDOM.render(
   <React.StrictMode>
     <PostProvider>
       <UserProvider>
-      <App />
+        <App />
       </UserProvider>
     </PostProvider>
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById("root")
 );
-
 ```
 
 Now in `Authentication.js`
 
 ```js
-
-import React, { useContext } from 'react'
-import SignInAndSignUp from './SignInAndSignUp';
-import CurrentUser from './CurrentUser';
-import { UserContext } from '../Context/UserProvider';
-
+import React, { useContext } from "react";
+import SignInAndSignUp from "./SignInAndSignUp";
+import CurrentUser from "./CurrentUser";
+import { UserContext } from "../Context/UserProvider";
 
 function Authentication() {
-    const {user, userLoaded} = useContext(UserContext);
-    if(userLoaded) return null;
-    // console.log(user);
-    return (
-        <div>
-            {user ? <CurrentUser {...user}/> : <SignInAndSignUp/>}
-        </div>
-    )
+  const { user, userLoaded } = useContext(UserContext);
+  if (userLoaded) return null;
+  // console.log(user);
+  return <div>{user ? <CurrentUser {...user} /> : <SignInAndSignUp />}</div>;
 }
 
-export default Authentication
+export default Authentication;
 ```
 
 ## Some UI Changes
@@ -969,22 +952,20 @@ In `Post.jsx`
 // Importing state from `UserProvider`
 const currentUser = useContext(UserProvider);
 
-
 // Here I am creating a little helper function
-const belongsToCurrentUser = (currentUser, postAuthor)=>{
-
-  if(!currentUser) return false;
+const belongsToCurrentUser = (currentUser, postAuthor) => {
+  if (!currentUser) return false;
   return currentUser.uid === postAuthor.uid;
-}
+};
 
 // Now in delete button
-{belongsToCurrentUser(currentUser.user, user) &&  (
-  <button className="delete" onClick={remove}>
-    Delete
-  </button>
-  )
+{
+  belongsToCurrentUser(currentUser.user, user) && (
+    <button className="delete" onClick={remove}>
+      Delete
+    </button>
+  );
 }
-
 ```
 
 ## Creating a User Profile Page
@@ -1014,11 +995,11 @@ ReactDOM.render(
 In `App.js`
 
 ```js
-import React from 'react';
-import Authentication from './components/Authentication';
-import Posts from './components/Posts';
-import { Switch, Route, Link } from 'react-router-dom';
-import UserProfile from './UserProfile';
+import React from "react";
+import Authentication from "./components/Authentication";
+import Posts from "./components/Posts";
+import { Switch, Route, Link } from "react-router-dom";
+import UserProfile from "./UserProfile";
 
 function App() {
   return (
@@ -1037,25 +1018,26 @@ function App() {
 }
 
 export default App;
-
 ```
 
 In `CurrentUser.jsx`
 
 ```js
-<Link to="/profile"><h2>{displayName}</h2></Link>
+<Link to="/profile">
+  <h2>{displayName}</h2>
+</Link>
 ```
 
 Okay, let's implement `UserProfile` page
 
 ```js
-import { auth } from './firebase';
-import React, { useRef, useState } from 'react';
-import { firestore } from './firebase';
+import { auth } from "./firebase";
+import React, { useRef, useState } from "react";
+import { firestore } from "./firebase";
 
 const UserProfile = () => {
   const [state, setState] = useState({
-    displayName: '',
+    displayName: "",
   });
 
   // Implementation can be wrong!
@@ -1096,7 +1078,13 @@ const UserProfile = () => {
           onChange={handleChange}
           placeholder="Enter display name."
         />
-        <input type="file" ref={imageInput.current} name="image-upload" />
+        // Asking myself again why I have written ref like this, maybe to set and
+        get file name from the input
+        <input
+          type="file"
+          ref={(ref) => (imageInput.current = ref)}
+          name="image-upload"
+        />
         <input className="update" type="submit" />
       </form>
     </section>
@@ -1104,5 +1092,71 @@ const UserProfile = () => {
 };
 
 export default UserProfile;
+```
+
+## Storage
+
+So what if user wants to upload a new profile picture ? We should facilitate that, right ?
+
+So by using firebase storage, we will store images in it.
+By this way, we can upload new profile picture for those users who will sign in from email and password and can re-upload profile picture who sign in from googleSignIn or other OAuth providers.
+
+Let's add storage to `firebase.js`
+
+```js
+import "firebase/storage";
+```
+
+Cool, now we will export that as well
+
+```js
+export const storage = firebase.storage();
+```
+
+Now Comes the meat part, uploading the file
+Back in `UserProfile.js`:
+
+```js
+const imageInput = useRef(null);
+
+// Creating function for getting filename from the input field if it exists and only getting one file at a time.
+const file = () => {
+  return imageInput.current && imageInput.current.files[0];
+};
+
+// Now in handleSubmit()
+
+if (file()) {
+  storage
+    .ref()
+    .child("user-profiles")
+    .child(uid())
+    .child(file().name)
+    .put(file())
+    .then((response) => response.ref.getDownloadURL())
+    .then((photoURL) => userRef().update({ photoURL }));
+}
+```
+
+### Note:
+Basically it is checking if the file exists if exists then we are referencing the storage by `storage.ref()`, then we are creating a new folder named `user-profiles` and then inside it we are creating a new folder of `uid` or `userId` referenced to the `user` who has signed in currently and then putting that file into that folder with that same name in which we have selected from our file storage.
+
+`storage.ref` return promise so in that we are getting `url` of the file by calling `getDownloadURL()` method.
+
+We are also updating our database by adding `photoURL` to the `users` document.
+
+### Adding security rules on the storage bucket
+
+currenlty our application could blow up.
+
+```js
+
+service.firebase.storage {
+  match /b/{bucket}/o {
+    match /user-profiles/{userId}/{photoURL}{
+      allow read, write: if request.auth.uid == userId;
+    }
+  }
+}
 
 ```

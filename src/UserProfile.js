@@ -1,66 +1,76 @@
-import React, { Component } from 'react';
-import { auth, firestore, storage } from './firebase';
+import { auth } from "./firebase";
+import React, { useRef, useState } from "react";
+import { firestore, storage } from "./firebase";
 
-class UserProfile extends Component {
-  state = { displayName: '' };
-  imageInput = null;
+const UserProfile = () => {
+  const [state, setState] = useState({
+    displayName: "",
+  });
+  // TODO: put a loader in updating a profile
+  const imageInput = useRef(null);
 
-  get uid() {
-    return auth.currentUser.uid;
-  }
-
-  get file() {
-	return this.imageInput && this.imageInput.files[0];
-  }
-  get userRef() {
-    return firestore.collection('users').doc(this.uid);
-  }
-
-  handleChange = event => {
+  const handleChange = (event) => {
     const { name, value } = event.target;
-    this.setState({ [name]: value });
+    setState({ [name]: value });
   };
 
-  handleSubmit = event => {
+  const file = () => {
+    return imageInput.current && imageInput.current.files[0];
+  };
+
+  const uid = () => {
+    return auth.currentUser.uid;
+  };
+
+  const userRef = () => {
+    return firestore.doc(`users/${uid()}`);
+  };
+
+  const handleSubmit = (event) => {
     event.preventDefault();
 
-    const { displayName } = this.state;
-
+    const { displayName } = state;
     if (displayName) {
-      this.userRef.update(this.state);
-	}
-	
-	if (this.file) {
-		storage
-		  .ref()
-		  .child('user-profiles')
-		  .child(this.uid)
-		  .child(this.file.name)
-		  .put(this.file)
-		  .then(response => response.ref.getDownloadURL())
-		  .then(photoURL => this.userRef.update({ photoURL }));
-	  }
+      userRef().update({
+        displayName,
+      });
+    }
+
+    if (file()) {
+      storage
+        .ref()
+        .child("user-profiles")
+        .child(uid())
+        .child(file().name)
+        .put(file())
+        .then((response) => response.ref.getDownloadURL())
+        .then((photoURL) => userRef().update({ photoURL }));
+    }
+
+    console.log(file().name);
   };
 
-  render() {
-    const { displayName } = this.state;
-
-    return (
-      <section className="UserProfile">
-        <form onSubmit={this.handleSubmit} className="UpdateUser">
-          <input
-            type="text"
-            name="displayName"
-            value={displayName}
-            placeholder="Display Name"
-            onChange={this.handleChange}
-          />
-          <input type="file" ref={ref => (this.imageInput = ref)} />
-          <input className="update" type="submit" />
-        </form>
-      </section>
-    );
-  }
-}
+  const { displayName } = state;
+  return (
+    <section className="UserProfile">
+      <form onSubmit={handleSubmit} className="UpdateUser">
+        <input
+          type="text"
+          name="displayName"
+          value={displayName}
+          onChange={handleChange}
+          placeholder="Enter display name."
+        />
+        <input
+          type="file"
+          // To access the file name, i have written like this.
+          ref={(ref) => (imageInput.current = ref)}
+          name="image-upload"
+        />
+        <input className="update" type="submit" />
+      </form>
+    </section>
+  );
+};
 
 export default UserProfile;
