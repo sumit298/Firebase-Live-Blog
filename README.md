@@ -1040,7 +1040,7 @@ const UserProfile = () => {
     displayName: "",
   });
 
-  // Implementation can be wrong!
+  
   const imageInput = useRef(null);
 
   const handleChange = (event) => {
@@ -1096,7 +1096,9 @@ export default UserProfile;
 
 ## Storage
 
-So what if user wants to upload a new profile picture ? We should facilitate that, right ?
+So what if user wants to upload a new profile picture ? 
+
+We should facilitate that, right ?
 
 So by using firebase storage, we will store images in it.
 By this way, we can upload new profile picture for those users who will sign in from email and password and can re-upload profile picture who sign in from googleSignIn or other OAuth providers.
@@ -1114,7 +1116,7 @@ export const storage = firebase.storage();
 ```
 
 Now Comes the meat part, uploading the file
-Back in `UserProfile.js`:
+back in `UserProfile.js`:
 
 ```js
 const imageInput = useRef(null);
@@ -1146,8 +1148,6 @@ Basically it is checking if the file exists if exists then we are referencing th
 We are also updating our database by adding `photoURL` to the `users` document.
 
 ### Adding security rules on the storage bucket
-
-currenlty our application could blow up.
 
 ```js
 
