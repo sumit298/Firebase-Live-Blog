@@ -1,7 +1,7 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/auth';
-
+import 'firebase/storage'
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
 	apiKey: 'AIzaSyBW-2gHAbTDei5kpnx2U_aG-LJTxrgwrt0',
@@ -25,6 +25,7 @@ export const facebookSignIn = () => auth.signInWithPopup(facebookProvider);
 export const githubSignIn = () => auth.signInWithPopup(githubProvider);
 export const signOut = () => auth.signOut();
 export const firestore = firebase.firestore();
+export const storage = firebase.storage();
 
 window.firebase = firebase;
 
