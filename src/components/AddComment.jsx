@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 
-const AddComment = () => {
+const AddComment = ({onCreate}) => {
   const [comment, setComment] = useState({ content: "" });
 
   const handleChange = (event) => {
@@ -10,6 +10,7 @@ const AddComment = () => {
   };
   const handleSubmit = (event) => {
     event.preventDefault();
+    onCreate(comment)
     setComment({ content: "" });
   };
 

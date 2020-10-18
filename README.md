@@ -1160,3 +1160,10 @@ service.firebase.storage {
 }
 
 ```
+
+## Working with sub-collections
+
+```js
+
+
+```
