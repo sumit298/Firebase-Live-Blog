@@ -4,10 +4,12 @@ import Comments from "./Comments";
 import { firestore } from "../firebase";
 import { collectIdAndData } from "../utilities";
 import { withRouter } from "react-router-dom";
+import withUserHOC from "./withUserHOC";
 
 const PostPage = (props) => {
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
+  // console.log(props);
   // Some helper functions
   const postId = () => {
     return props.match.params.id;
@@ -38,7 +40,7 @@ const PostPage = (props) => {
     const getComments = () => {
       unsubscribeFromComment = commentsRef().onSnapshot((snapshot) => {
         const comments = snapshot.docs.map(collectIdAndData);
-        console.log(comments);
+        // console.log(comments);
         setComments(comments);
       });
     };
@@ -48,11 +50,14 @@ const PostPage = (props) => {
       unsubscribeFromPost();
       unsubscribeFromComment();
     };
+    // react-hooks/exhaustive-deps
   }, []);
 
   const createComment = (comment) => {
+    const {user} = props.user;
     commentsRef().add({
-      ...comment
+      ...comment,
+      user
     })
   };
 
@@ -64,4 +69,4 @@ const PostPage = (props) => {
   );
 };
 
-export default withRouter(PostPage);
+export default withRouter(withUserHOC(PostPage));
