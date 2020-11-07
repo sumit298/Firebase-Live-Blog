@@ -1163,7 +1163,92 @@ service.firebase.storage {
 
 ## Working with sub-collections
 
+Basically meaning a collection under a collection i.e nested collections
+Suppose our posts collection have a comments sub-collection, then those comments are sub-collection of only individual posts. 
+
+Each comments in the one post is unique than the other comment in the another post.
+
+`Advantages`:
+
+- It gives you more structured database.
+- Queries are indexed by default. Query Performance is proportional to the size of your result set, not your data set. `So does not matter the size of your application, the performance depends on the size of your result set.`
+- `Each document has max size of 1MB.`  For instance, if you have an array of orders in your customer document, it might be a good idea to create a subcollection of orders to each customer because you cannot foresee how many orders a customer will have. By doing this you don’t need to worry about the max size of your document.
+  
+- `Pricing`: Firestore charges you for document reads, writes and deletes. Therefore, when you create many subcollections instead of using arrays in the documents, you will need to perform more read, writes and deletes, thus increasing your bill.
+
+- Documents are easier to delete. Using sub collections you need to make sure to first delete all sub collection documents before you delete the parent document. There is no API for this so you might need to roll your own helper functions.
+
+- Having the parent id directly in each (sub) document might make it easier to process query results, depending on the application.
+  
+- No need to store a reference/foreign key/id of the parent document, as it is implied by the database structure. You can get to the parent via the sub collection document ref.
+
+
+Let's create a page for a single post where one can leave comments
+
+In `PostPage.jsx`
+
 ```js
-Now
+
+import React, { useEffect, useState } from "react";
+import Post from "./Post";
+import Comments from "./Comments";
+import { firestore } from "../firebase";
+import { collectIdAndData } from "../utilities";
+import { withRouter } from 'react-router-dom'; //HOC
+
+const PostPage = (props)=>{
+  const [post, setPost] = useState(null);
+  const [comments, setComments] = useState([]);
+
+  // Some Helper functions.
+  const postId = ()=>{
+    return props.match.params.id;
+  };
+
+  const postRef = ()=>{
+    return firestore.doc(`/posts/${postId()}`);
+  }
+
+  const commentsRef = ()=>{
+    const commentRefs = postRef().collection("comments");
+    return commentRefs;
+  }
+
+  useEffect(()=>{
+    let unsubscribeFromComment = null;
+    let unsubscribeFromPost = null;
+
+    const getPost = async () =>{
+      unsubscribeFromPost = await postRef().onSnapshot(snapshot=>{
+        const posts = collectIdAndData(snapshot);
+        setPost(posts)
+      });
+    };
+
+    const getComments = ()=>{
+      unsubscribeFromComment = commentRef().onSnapShot(snapshot=>{
+        const comments = snapshot.docs.map(collectIdAndData);
+        setComments(comments);
+      });
+    };
+
+    getPost();
+    getComments();
+    return ()=>{
+      unsubscribeFromPost();
+      unsubscribeFromComment();
+    }
+  })
+  return (
+    <section>
+    {post && <Post {...post}>}
+    <Comments comments={comments}/>
+    </section>
+  )
+}
+
+export default withRouter(PostPage);
 
 ```
+
+So what I have done here is grab that prop, hook into the firebase, subscribe to its document, also get its comments which is a subcollection and subscribe to those as well and hold on the references so that we can add comments there, right! which will be determined by the URL which will tell us what to subscribe to and unsubscribe to.  
